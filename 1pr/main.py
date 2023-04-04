@@ -1,3 +1,6 @@
+from typing import Tuple
+
+
 class node:
     status : str
     letter: str
@@ -72,6 +75,7 @@ def populate(st: node) -> tree:
         st.letter=ord(node_counter)
         node_counter = node_counter+1
         ans.struct[0] = {0: st}
+        #TODO: move the counters to the inside of the tree...
         populate_next_level(ans,st,node_counter, {})
         return ans
 
@@ -81,27 +85,35 @@ def find_by_status(t: tree, state: str, lvl: int):
             return st
     return None
 
-def populate_next_level(t: tree, st: node, ncounter: int, lookupHashTable: dict[str, tuple[int,int]]) -> dict[str, tuple[int,int]]:
+def populate_next_level(t: tree, st: node, ncounter: int, lookupHashTable: dict[str, tuple[int,int]]) -> Tuple[int,  dict[str, tuple[int,int]]]:
     lvlndcnt = 0
+    thisIterHashTable ={}
     for i in range(len(st.status)-1):
         if(isvalidmove(st.status, i, i+2)):
             new_status = do_move(st.status, i, i+2)
-            if new_status not in lookupHashTable:
-                #print(new_status)
-                
-                lookupHashTable[new_status] = (st.level+1, lvlndcnt)
-                newnode = node()
-                newnode.level = st.level+1
-                newnode.status = new_status
-                newnode.parents.append(newnode)
-                st.children.append(st)
-                newnode.letter = ord(ncounter)
-                ncounter = ncounter+1
-                if st.level+1 not in t.struct:
-                    t.struct[st.level+1]={}
-                t.struct[st.level+1][lvlndcnt] = newnode
-                lvlndcnt = lvlndcnt+1
-    return lookupHashTable
+            if new_status not in thisIterHashTable:
+                if new_status not in lookupHashTable:
+                    #print(new_status)
+                    thisIterHashTable[new_status] = (st.level+1, lvlndcnt)
+                    lookupHashTable[new_status] = (st.level+1, lvlndcnt)
+                    newnode = node()
+                    newnode.level = st.level+1
+                    newnode.status = new_status
+                    newnode.parents.append(newnode)
+                    st.children.append(st)
+                    newnode.letter = ord(ncounter)
+                    ncounter = ncounter+1
+                    if st.level+1 not in t.struct:
+                        t.struct[st.level+1]={}
+                    t.struct[st.level+1][lvlndcnt] = newnode
+                    lvlndcnt = lvlndcnt+1
+                else:
+                   nd =find_by_status(t,new_status,st.level+1)
+                   if st not in nd.parents:
+                        nd.parents.append(st)
+                        thisIterHashTable[new_status] = (st.level+1, lvlndcnt)
+                        
+    return (lvlndcnt, lookupHashTable)
     
 def main():
     n = node()
