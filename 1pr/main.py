@@ -66,25 +66,30 @@ def do_move(state: str, frm: int, to: int) -> str:
     if to<=frm: return "ERROR"
     reslt = "1" if state[frm:to] == "00" else "0" if state[frm:to] == "10" else "0" if state[frm:to] == "01" else state[frm:to]
     return state[0:frm]+reslt+state[to:len(state)]
+
+def is_game_over(tr: tree, lvl: int) -> bool:
+    for nr, st in tr.struct[lvl].items():
+        if(len(st.status) > 3):
+            return False
+    return True
+    
 #oh no cannot define a method inside class (node) that returns a list of this class objects?        
 def populate(st: node) -> tree:
+        current_level = 0
         ans = tree()
         node_counter =0
-        st.level = 0
+        st.level = current_level
         st.location = 0
         st.letter=ord(node_counter)
         node_counter = node_counter+1
         ans.struct[0] = {0: st}
         #TODO: move the counters to the inside of the tree...
-        (node_counter, unused1, unused2) = populate_next_level(ans,st,node_counter, 0, {})
-        ndcount = 0
-        lasthashtable = {}
-        for nr, nd in ans.struct[st.level+1].items():
-            (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
-        ndcount = 0
-        lasthashtable = {}          
-        for nr, nd in ans.struct[st.level+2].items():
-            (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
+        while(not is_game_over(ans, current_level)):
+            ndcount = 0
+            lasthashtable = {}
+            for nr, nd in ans.struct[current_level].items():
+                (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
+            current_level = current_level +1
         return ans
 
 def find_by_status(t: tree, state: str, lvl: int):
