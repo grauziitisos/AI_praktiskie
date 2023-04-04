@@ -70,18 +70,38 @@ def populate(st: node) -> tree:
         st.level = 0
         st.location = 0
         st.letter=ord(node_counter)
-        ans.struct[1] = {1: st}
-        populate_next_level(ans,st,node_counter)
+        node_counter = node_counter+1
+        ans.struct[0] = {0: st}
+        populate_next_level(ans,st,node_counter, {})
         return ans
 
-def populate_next_level(t: tree, st: node, ncounter: int):
-    lookupHashTable = {}
+def find_by_status(t: tree, state: str, lvl: int):
+    for num, st in t.struct[lvl].items():
+        if(st.status == state):
+            return st
+    return None
+
+def populate_next_level(t: tree, st: node, ncounter: int, lookupHashTable: dict[str, tuple[int,int]]) -> dict[str, tuple[int,int]]:
+    lvlndcnt = 0
     for i in range(len(st.status)-1):
         if(isvalidmove(st.status, i, i+2)):
             new_status = do_move(st.status, i, i+2)
-            if not new_status in lookupHashTable:
-                print(new_status)
-                lookupHashTable[new_status] = 1
+            if new_status not in lookupHashTable:
+                #print(new_status)
+                
+                lookupHashTable[new_status] = (st.level+1, lvlndcnt)
+                newnode = node()
+                newnode.level = st.level+1
+                newnode.status = new_status
+                newnode.parents.append(newnode)
+                st.children.append(st)
+                newnode.letter = ord(ncounter)
+                ncounter = ncounter+1
+                if st.level+1 not in t.struct:
+                    t.struct[st.level+1]={}
+                t.struct[st.level+1][lvlndcnt] = newnode
+                lvlndcnt = lvlndcnt+1
+    return lookupHashTable
     
 def main():
     n = node()
@@ -90,7 +110,7 @@ def main():
     thetree = populate(n)
     for nd, kv in thetree.struct.items():
         for k, v in kv.items():
-            print(v.letter)
+            print(v.letter+" -> "+v.status)
     
 if __name__ == "__main__":
     main()
