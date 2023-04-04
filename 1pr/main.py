@@ -76,7 +76,15 @@ def populate(st: node) -> tree:
         node_counter = node_counter+1
         ans.struct[0] = {0: st}
         #TODO: move the counters to the inside of the tree...
-        populate_next_level(ans,st,node_counter, {})
+        (node_counter, unused1, unused2) = populate_next_level(ans,st,node_counter, 0, {})
+        ndcount = 0
+        lasthashtable = {}
+        for nr, nd in ans.struct[st.level+1].items():
+            (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
+        ndcount = 0
+        lasthashtable = {}          
+        for nr, nd in ans.struct[st.level+2].items():
+            (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
         return ans
 
 def find_by_status(t: tree, state: str, lvl: int):
@@ -85,8 +93,7 @@ def find_by_status(t: tree, state: str, lvl: int):
             return st
     return None
 
-def populate_next_level(t: tree, st: node, ncounter: int, lookupHashTable: dict[str, tuple[int,int]]) -> Tuple[int,  dict[str, tuple[int,int]]]:
-    lvlndcnt = 0
+def populate_next_level(t: tree, st: node, ncounter: int, lvlndcnt: int, lookupHashTable: dict[str, tuple[int,int]]) -> Tuple[int, int,  dict[str, tuple[int,int]]]:
     thisIterHashTable ={}
     for i in range(len(st.status)-1):
         if(isvalidmove(st.status, i, i+2)):
@@ -113,7 +120,7 @@ def populate_next_level(t: tree, st: node, ncounter: int, lookupHashTable: dict[
                         nd.parents.append(st)
                         thisIterHashTable[new_status] = (st.level+1, lvlndcnt)
                         
-    return (lvlndcnt, lookupHashTable)
+    return (ncounter, lvlndcnt, lookupHashTable)
     
 def main():
     n = node()
