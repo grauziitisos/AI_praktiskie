@@ -3,13 +3,15 @@ class node:
     letter: str
     parents: list
     children: list
+    level: int
+    location: int
     def __init__(self):
         self.parents = []
         self.children = []
 
 def ord(num: int) -> str:
     upperalphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    if(num <0): return "ERROR"
+    if(num <0): return "TOOSMALL"
     if(num < len(upperalphabet)): return upperalphabet[num]
     """
     var a="[";for(let j=0; j<26; j++) for (let i = 0; i < 26; i++)
@@ -54,12 +56,29 @@ def isvalidmove(state: str, frm: int, to: int)  -> bool:
     if frm <0: return False
     if to<=frm: return False
     return state[frm:to] == "00" or state[frm:to] == "10" or state[frm:to] == "01"
-        
+
+def do_move(state: str, frm: int, to: int) -> str:
+    if len(state) < to: return "ERROR"
+    if frm <0: return "ERROR"
+    if to<=frm: return "ERROR"
+    reslt = "1" if state[frm:to] == "00" else "0" if state[frm:to] == "10" else "0" if state[frm:to] == "01" else state[frm:to]
+    return state[0:frm]+reslt+state[to:len(state)]
 #oh no cannot define a method inside class (node) that returns a list of this class objects?        
 def populate(st: node) -> tree:
         ans = tree()
+        node_counter =0
+        st.level = 0
+        st.location = 0
+        st.letter=ord(node_counter)
         ans.struct[1] = {1: st}
+        populate_next_level(ans,st,node_counter)
         return ans
+
+def populate_next_level(t: tree, st: node, ncounter: int):
+    lookupHashTable = {}
+    for i in range(len(st.status)-1):
+        if(isvalidmove(st.status, i, i+2)):
+            print(do_move(st.status, i, i+2))
     
 def main():
     n = node()
