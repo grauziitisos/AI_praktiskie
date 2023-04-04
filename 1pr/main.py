@@ -62,16 +62,12 @@ def populate(st: node) -> tree:
     
 def main():
     n = node()
-    n.letter = "A"
+    n.letter = ord(0)
     n.status="110010"
     thetree = populate(n)
     for nd, kv in thetree.struct.items():
         for k, v in kv.items():
             print(v.letter)
-    print(ord(0))
-    print(ord(25))
-    print(ord(26))
-    print(ord(27))
     
 if __name__ == "__main__":
     main()
