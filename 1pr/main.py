@@ -78,7 +78,10 @@ def populate_next_level(t: tree, st: node, ncounter: int):
     lookupHashTable = {}
     for i in range(len(st.status)-1):
         if(isvalidmove(st.status, i, i+2)):
-            print(do_move(st.status, i, i+2))
+            new_status = do_move(st.status, i, i+2)
+            if not new_status in lookupHashTable:
+                print(new_status)
+                lookupHashTable[new_status] = 1
     
 def main():
     n = node()
