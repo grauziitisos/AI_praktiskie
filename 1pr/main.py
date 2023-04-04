@@ -67,9 +67,13 @@ def do_move(state: str, frm: int, to: int) -> str:
     reslt = "1" if state[frm:to] == "00" else "0" if state[frm:to] == "10" else "0" if state[frm:to] == "01" else state[frm:to]
     return state[0:frm]+reslt+state[to:len(state)]
 
+#fail to overload.. missing positional argument...
+def is_game_over(st: node) -> bool:
+    return len(st.status) <= 3
+
 def is_game_over(tr: tree, lvl: int) -> bool:
     for nr, st in tr.struct[lvl].items():
-        if(len(st.status) > 3):
+        if( not is_game_over(st)):
             return False
     return True
     
