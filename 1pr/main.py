@@ -44,6 +44,7 @@ def ord(num: int) -> str:
     if (num > 26+len(followingcols)): return "TOOBIG"
     return followingcols[num-26]
 class tree:
+    #would be nice to have a setter that autoincreases last letter counter on set...
     struct: dict[int, dict[int, node]]
     def __init__(self):
         self.struct = {}
