@@ -68,12 +68,12 @@ def do_move(state: str, frm: int, to: int) -> str:
     return state[0:frm]+reslt+state[to:len(state)]
 
 #fail to overload.. missing positional argument...
-def is_game_over(st: node) -> bool:
+def is_game_over_for_node(st: node) -> bool:
     return len(st.status) <= 3
 
 def is_game_over(tr: tree, lvl: int) -> bool:
     for nr, st in tr.struct[lvl].items():
-        if( not is_game_over(st)):
+        if( not is_game_over_for_node(st)):
             return False
     return True
     
