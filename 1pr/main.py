@@ -92,7 +92,8 @@ def populate(st: node) -> tree:
             ndcount = 0
             lasthashtable = {}
             for nr, nd in ans.struct[current_level].items():
-                (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
+                if(not is_game_over_for_node(nd)):
+                    (node_counter,ndcount, lasthashtable) = populate_next_level(ans,nd,node_counter, ndcount, lasthashtable)
             current_level = current_level +1
         return ans
 
