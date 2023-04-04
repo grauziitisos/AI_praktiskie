@@ -4,8 +4,8 @@ from typing import Tuple
 class node:
     status : str
     letter: str
-    parents: list
-    children: list
+    parents: list#[node]
+    children: list#[node]
     level: int
     location: int
     def __init__(self):
@@ -58,7 +58,7 @@ def isvalidmove(state: str, frm: int, to: int)  -> bool:
     if len(state) < to: return False
     if frm <0: return False
     if to<=frm: return False
-    return state[frm:to] == "00" or state[frm:to] == "10" or state[frm:to] == "01"
+    return state[frm:to] == "00" or state[frm:to] == "10" #or state[frm:to] == "01"
 
 def do_move(state: str, frm: int, to: int) -> str:
     if len(state) < to: return "ERROR"
@@ -107,8 +107,9 @@ def populate_next_level(t: tree, st: node, ncounter: int, lvlndcnt: int, lookupH
                     newnode.level = st.level+1
                     newnode.status = new_status
                     newnode.parents.append(newnode)
-                    st.children.append(st)
+                    st.children.append(newnode)
                     newnode.letter = ord(ncounter)
+                    newnode.location = lvlndcnt
                     ncounter = ncounter+1
                     if st.level+1 not in t.struct:
                         t.struct[st.level+1]={}
@@ -118,6 +119,7 @@ def populate_next_level(t: tree, st: node, ncounter: int, lvlndcnt: int, lookupH
                    nd =find_by_status(t,new_status,st.level+1)
                    if st not in nd.parents:
                         nd.parents.append(st)
+                        st.children.append(nd)
                         thisIterHashTable[new_status] = (st.level+1, lvlndcnt)
                         
     return (ncounter, lvlndcnt, lookupHashTable)
@@ -129,7 +131,10 @@ def main():
     thetree = populate(n)
     for nd, kv in thetree.struct.items():
         for k, v in kv.items():
-            print(v.letter+" -> "+v.status)
+            a =""
+            for cn in v.children:
+                a+= " ("+str(cn.level)+":"+str(cn.location)+") "
+            print(v.letter+"|"+str(v.level)+":"+str(v.location)+"|"+" -> "+v.status+" "+a)
     
 if __name__ == "__main__":
     main()
