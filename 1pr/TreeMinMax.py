@@ -2,6 +2,7 @@ from typing import Tuple
 
 
 class node:
+    perf_flag: bool = False
     status : str
     letter: str
     parents: list#[node]
@@ -46,7 +47,7 @@ def ord(num: int) -> str:
                      "XA", "XB", "XC", "XD", "XE", "XF", "XG", "XH", "XI", "XJ", "XK", "XL", "XM", "XN", "XO", "XP", "XQ", "XR", "XS", "XT", "XU", "XV", "XW", "XX", "XY", "XZ", 
                      "YA", "YB", "YC", "YD", "YE", "YF", "YG", "YH", "YI", "YJ", "YK", "YL", "YM", "YN", "YO", "YP", "YQ", "YR", "YS", "YT", "YU", "YV", "YW", "YX", "YY", "YZ", 
                      "ZA", "ZB", "ZC", "ZD", "ZE", "ZF", "ZG", "ZH", "ZI", "ZJ", "ZK", "ZL", "ZM", "ZN", "ZO", "ZP", "ZQ", "ZR", "ZS", "ZT", "ZU", "ZV", "ZW", "ZX", "ZY", "ZZ", ]
-    if (num > 26+len(followingcols)): return "TOOBIG"
+    if (num > 25+len(followingcols)): return "TOOBIG"
     return followingcols[num-26]
 class tree:
     #would be nice to have a setter that autoincreases last letter counter on set...
@@ -72,13 +73,13 @@ def isvalidmove(state: str, frm: int, to: int)  -> bool:
     if len(state) < to: return False
     if frm <0: return False
     if to<=frm: return False
-    return state[frm:to] == "00" or state[frm:to] == "10" #or state[frm:to] == "01"
+    return state[frm:to] == "00" or state[frm:to] == "10" or state[frm:to] == "01" or state[frm:to] == "11"
 
 def do_move(state: str, frm: int, to: int) -> str:
     if len(state) < to: return "ERROR"
     if frm <0: return "ERROR"
     if to<=frm: return "ERROR"
-    reslt = "1" if state[frm:to] == "00" else "0" if state[frm:to] == "10" else "0" if state[frm:to] == "01" else state[frm:to]
+    reslt = "1" if state[frm:to] == "00" or state[frm:to] == "01" else "0" if state[frm:to] == "10" or state[frm:to] == "11" else state[frm:to]
     return state[0:frm]+reslt+state[to:len(state)]
 
 #fail to overload.. missing positional argument...
@@ -196,6 +197,7 @@ def get_a_child_from_childs_with_max_novertejums(nod: node) -> node:
     return maxchild
 
 def try_set_novertejumu(nod: node, *args):
+    if(nod.perf_flag): return
     ismaxstart = args[0]
     if not hasattr(nod, 'evaluation'):
         if(len(nod.status) <= 3):
@@ -204,6 +206,7 @@ def try_set_novertejumu(nod: node, *args):
                     nod.evaluation = 1 if(nod.status[0:2]=="11") else -1 if (nod.status[0:2]=="00") else 0
                 else:
                     nod.evaluation = -1 if(nod.status[0:2]=="11") else 1 if (nod.status[0:2]=="00") else 0
+                nod.perf_flag = True
             #else:
             #    if(not ismaxstart):
             #        nod.evaluation = 1 if(nod.status[0:2]=="11") else -1 if (nod.status[0:2]=="00") else 0
@@ -215,6 +218,7 @@ def try_set_novertejumu(nod: node, *args):
                     nod.evaluation = get_childs_max_novertejums(nod) if ismaxstart else get_childs_min_novertejums(nod)
                 else:
                     nod.evaluation = get_childs_max_novertejums(nod) if not ismaxstart else get_childs_min_novertejums(nod)
+                nod.perf_flag = True
                 
 
 def testprint(nd: node):
