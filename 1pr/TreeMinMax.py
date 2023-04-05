@@ -167,6 +167,16 @@ def get_childs_min_novertejums(nod: node) -> int:
             minnov = nd.evaluation
     return minnov
 
+def get_a_child_from_childs_with_min_novertejums(nod: node) -> node:
+    if(len(nod.children)<1): return None
+    minchild = nod.children[0]
+    minnov = nod.children[0].evaluation
+    for nd in nod.children:
+        if(nd.evaluation < minnov):
+            minnov = nd.evaluation
+            minchild = nd
+    return minchild
+
 def get_childs_max_novertejums(nod: node) -> int:
     if(len(nod.children)<1): return None
     maxnov = nod.children[0].evaluation
@@ -174,6 +184,16 @@ def get_childs_max_novertejums(nod: node) -> int:
         if(nd.evaluation > maxnov):
             maxnov = nd.evaluation
     return maxnov
+
+def get_a_child_from_childs_with_max_novertejums(nod: node) -> node:
+    if(len(nod.children)<1): return None
+    maxchild = nod.children[0]
+    maxnov = nod.children[0].evaluation
+    for nd in nod.children:
+        if(nd.evaluation > maxnov):
+            maxnov = nd.evaluation
+            maxchild = nd
+    return maxchild
 
 def try_set_novertejumu(nod: node, *args):
     ismaxstart = args[0]

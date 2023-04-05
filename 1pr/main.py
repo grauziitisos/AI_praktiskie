@@ -1,5 +1,5 @@
 import TreeMinMax as t
-from PyQt5.QtWidgets import QApplication, QGridLayout, QMainWindow, QFrame, QSizePolicy, QSpinBox, QLabel, QVBoxLayout, QWidget, QTextBrowser, QPushButton, QComboBox, QPlainTextEdit
+from PyQt5.QtWidgets import QApplication, QGridLayout, QMainWindow, QFrame, QSizePolicy, QSpinBox, QLabel, QVBoxLayout, QWidget, QTextBrowser, QPushButton, QComboBox, QPlainTextEdit, QMessageBox
 from PyQt5.QtCore import  Qt, pyqtSlot, QCoreApplication
 import sys
 from PyQt5 import QtGui
@@ -37,13 +37,17 @@ class Window(QMainWindow):
         self.plotBarLayout = QVBoxLayout()
         self.grid = QGridLayout() 
         self.plotdpi = 100
+        
+        self.moveNr = 0
+        self.status = self.tree.struct[0][0].status
+        self.backlog = ""
 
         self.lblxstart = QLabel("sākuma bits:", self)
         self.lblxstart.setGeometry(30, 30+10, 50, 30)
         self.inpxstart = QSpinBox(self)
         self.inpxstart.setMinimum(0)
-        self.inpxstart.setMaximum(len(self.tree.struct[0][0].status)-2)
-        self.inpxstart.setValue(len(self.tree.struct[0][0].status)-2)
+        self.inpxstart.setMaximum(len(self.status)-2)
+        self.inpxstart.setValue(len(self.status)-2)
         self.inpxstart.setGeometry(self.lblxstart.geometry().x()+self.lblxstart.geometry().width(), 30+10, 50, 30)
         self.inpxstart.valueChanged[int].connect(self.valChanged)
 
@@ -64,7 +68,7 @@ class Window(QMainWindow):
         self.lblyend = QLabel("sākuma stāvoklis:", self)
         self.lblyend.setGeometry(30, self.ddlwhofirst.geometry().y()+30+10, 50, 30)
         self.leStatus = QPlainTextEdit(self)
-        self.leStatus.setPlainText(self.tree.struct[0][0].status)
+        self.leStatus.setPlainText(self.status)
         self.leStatus.setGeometry(self.lblyend.geometry().x()+self.lblyend.geometry().width(), self.ddlwhofirst.geometry().y()+30+10, 50, 100)
         self.leStatus.textChanged.connect(self.statusChanged)
 
@@ -105,10 +109,10 @@ class Window(QMainWindow):
         self.show()
     
     def updateGameField(self):
-        tex = self.tree.struct[0][0].status[0:self.inpxstart.value()]+'<span style="color: red; font-style: italic;">' + \
-        self.tree.struct[0][0].status[self.inpxstart.value():self.inpxstart.value()+2]+"</span>"+ \
-            self.tree.struct[0][0].status[self.inpxstart.value()+2:len(self.tree.struct[0][0].status)]
-        self.textBrowser.setHtml('<h1 style="font-size: 36">'+tex+'</h1> <br /> # Varbūt gājinu vēsture?? <span style="color:red;">aaa!</span>[asdfasd] <a href="http://www.google.com">hmm</a>')
+        tex = self.status[0:self.inpxstart.value()]+'<span style="color: red; font-style: italic;">' + \
+        self.status[self.inpxstart.value():self.inpxstart.value()+2]+"</span>"+ \
+            self.status[self.inpxstart.value()+2:len(self.status)]
+        self.textBrowser.setHtml('<h1 style="font-size: 36">'+tex+'</h1> <br />'+ self.backlog)
 
     @pyqtSlot(int)
     def valChanged(self, value):
@@ -118,18 +122,69 @@ class Window(QMainWindow):
     @pyqtSlot()
     def clickedMove(self):
         print("speletajs izdara gajienu")
+        if(not t.isvalidmove(self.status,self.inpxstart.value(), self.inpxstart.value()+2)):
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Warning)
+            msgBox.setWindowIcon(QtGui.QIcon("diskb.ico"))
+            msgBox.setText("Šis nav derīgs gājiens!")
+            msgBox.setStandardButtons(QMessageBox.Ok )
+            msgBox.exec()
+            return
+        newstatus = t.do_move(self.status,self.inpxstart.value(), self.inpxstart.value()+2)
+        self.backlog = self.backlog + "<br /> #"+ str(self.moveNr)+"-&gt; <span style='color:#115D08;'>ES</span> :: "+ newstatus
+        self.status = newstatus
+        self.inpxstart.setMaximum(len(self.status)-2)
+        self.updateGameField()
+        thenode = t.find_by_status(self.tree, newstatus, self.moveNr+1)
+        if(t.is_game_over_for_node(thenode)):
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            msgBox.setWindowTitle("Rezultāts:")
+            msgBox.setWindowIcon(QtGui.QIcon("diskb.ico"))
+            msgBox.setText("Uzvarēja <br /><span style='color:#F27D00; font-weight: 800; font-size: 26;'>AI</span>" if(thenode.evaluation == 1) else "Uzvarēju <br /><span style='color:#115D08;'>ES</span>" if (thenode.evaluation == -1) else "Neizšķirts")
+            msgBox.setStandardButtons(QMessageBox.Ok )
+            msgBox.exec()
+            self.clickedNewGame()
+        else:
+            self.moveNr = self.moveNr+1
+            self.do_ai_move()
+    
+    def do_ai_move(self):
+            thenode = t.find_by_status(self.tree, self.status, self.moveNr)
+            thenode = t.get_a_child_from_childs_with_max_novertejums(thenode)
+            self.status = thenode.status
+            self.backlog = self.backlog + "<br /> #"+ str(self.moveNr)+"-&gt; <span style='color:#F27D00;'>AI</span> :: "+ self.status
+            self.moveNr =self.moveNr+1
+            self.inpxstart.setMaximum(len(self.status)-2)
+            self.updateGameField()
+            if(t.is_game_over_for_node(thenode)):
+                msgBox = QMessageBox()
+                msgBox.setIcon(QMessageBox.Information)
+                msgBox.setWindowTitle("Rezultāts:")
+                msgBox.setWindowIcon(QtGui.QIcon("diskb.ico"))
+                msgBox.setText("Uzvarēja <br /><span style='color:#F27D00; font-weight: 800; font-size: 26;'>AI</span>" if(thenode.evaluation == 1) else "Uzvarēju <br /><span style='color:#115D08;'>ES</span>" if (thenode.evaluation == -1) else "Neizšķirts")
+                msgBox.setStandardButtons(QMessageBox.Ok )
+                msgBox.exec()
+                self.clickedNewGame()
+                
     
     @pyqtSlot()
     def clickedNewGame(self):
-        print("~~~jauna spēle~~")
+        print("~~~~~~~~~~~~~~~jauna spēle~~~~~~~~~~~~~~~~~~")
+        self.moveNr = 0
+        self.backlog = ""
         n = t.tree.root_node_factory(self.leStatus.toPlainText ())
         thetree = t.populate(n)
         self.tree = thetree
-        self.inpxstart.setMaximum(len(self.tree.struct[0][0].status)-2)
+        self.status = self.tree.struct[0][0].status
+        self.inpxstart.setMaximum(len(self.status)-2)
         self.tree.a_log_of_tree()
-        t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, True)
+        t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, self.ddlwhofirst.currentText()=="AI")
         self.tree.a_log_of_tree()
-        self.updateGameField()
+        if(self.ddlwhofirst.currentText()=="AI"):
+            self.do_ai_move()
+        else:
+            self.updateGameField()
     
     @pyqtSlot(str)
     def ddlvalChanged(self, string):
@@ -148,7 +203,8 @@ def main():
     n = t.tree.root_node_factory("110010")
     thetree = t.populate(n)
     tree = thetree
-    t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, True)
+    #default is ES therefore minimiser.
+    t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, False)
     tree.a_log_of_tree()
 
     if get_ipython():
