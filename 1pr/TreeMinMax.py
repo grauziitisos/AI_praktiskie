@@ -54,11 +54,19 @@ class tree:
     def __init__(self):
         self.struct = {}
         
-    def root_node_factory(self, status: str) -> node:
+    def root_node_factory(status: str) -> node:
         n = node()
         n.letter = ord(0)
         n.status=status
         return n
+    
+    def a_log_of_tree(self):
+        for nd, kv in self.struct.items():
+            for k, v in kv.items():
+                a =""
+                for cn in v.children:
+                    a+= " ("+str(cn.level)+":"+str(cn.location)+") "
+                print(v.letter+"|"+str(v.level)+":"+str(v.location)+"|"+" -> "+v.status+" "+("["+str(v.evaluation)+"]" if hasattr(v, 'evaluation') else "")+a)
 
 def isvalidmove(state: str, frm: int, to: int)  -> bool:
     if len(state) < to: return False

@@ -137,12 +137,8 @@ def main():
     thetree = t.populate(n)
     tree = thetree
     t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, True)
-    for nd, kv in thetree.struct.items():
-        for k, v in kv.items():
-            a =""
-            for cn in v.children:
-                a+= " ("+str(cn.level)+":"+str(cn.location)+") "
-            print(v.letter+"|"+str(v.level)+":"+str(v.location)+"|"+" -> "+v.status+" "+("["+str(v.evaluation)+"]" if hasattr(v, 'evaluation') else "")+a)
+    tree.a_log_of_tree()
+
     if get_ipython():
         App = QCoreApplication.instance()
         if App is None:
