@@ -4,6 +4,7 @@ from PyQt5.QtCore import  Qt, pyqtSlot, QCoreApplication
 import sys
 from PyQt5 import QtGui
 from IPython import get_ipython
+import re
 
 tree=object
     
@@ -124,6 +125,10 @@ class Window(QMainWindow):
     
     @pyqtSlot()
     def statusChanged(self):
+        currtext = self.leStatus.toPlainText ()
+        replacedtx = re.sub('[^01]', '', currtext)
+        if(currtext != replacedtx):
+            self.leStatus.setPlainText(replacedtx)
         print("startStatus ->:>:> "+self.leStatus.toPlainText ())
 
 def main():
