@@ -133,18 +133,71 @@ def populate_next_level(t: tree, st: node, ncounter: int, lvlndcnt: int, lookupH
                         thisIterHashTable[new_status] = (st.level+1, lvlndcnt)
                         
     return (ncounter, lvlndcnt, lookupHashTable)
-    
+
+def do_action_to_subnodes_and_this(nod : node, cl: callable, *args):
+    for nd in nod.children:
+        do_action_to_subnodes_and_this(nd, cl, *args)
+    cl(nod, *args)
+
+def all_childs_has_novertejums(nod: node) -> bool:
+    for nd in nod.children:
+        if not hasattr(nd, 'evaluation'):
+            return False
+    return True
+
+def get_childs_min_novertejums(nod: node) -> int:
+    if(len(nod.children)<1): return None
+    minnov = nod.children[0].evaluation
+    for nd in nod.children:
+        if(nd.evaluation < minnov):
+            minnov = nd.evaluation
+    return minnov
+
+def get_childs_max_novertejums(nod: node) -> int:
+    if(len(nod.children)<1): return None
+    maxnov = nod.children[0].evaluation
+    for nd in nod.children:
+        if(nd.evaluation > maxnov):
+            maxnov = nd.evaluation
+    return maxnov
+
+def try_set_novertejumu(nod: node, *args):
+    ismaxstart = args[0]
+    if not hasattr(nod, 'evaluation'):
+        if(len(nod.status) <= 3):
+           # if(nod.level % 2 ==0):
+                if(ismaxstart):
+                    nod.evaluation = 1 if(nod.status[0:2]=="11") else -1 if (nod.status[0:2]=="00") else 0
+                else:
+                    nod.evaluation = -1 if(nod.status[0:2]=="11") else 1 if (nod.status[0:2]=="00") else 0
+            #else:
+            #    if(not ismaxstart):
+            #        nod.evaluation = 1 if(nod.status[0:2]=="11") else -1 if (nod.status[0:2]=="00") else 0
+            #    else:
+            #        nod.evaluation = -1 if(nod.status[0:2]=="11") else 1 if (nod.status[0:2]=="00") else 0
+        else:
+            if(all_childs_has_novertejums(nod)):
+                if(nod.level % 2 ==0):
+                    nod.evaluation = get_childs_max_novertejums(nod) if ismaxstart else get_childs_min_novertejums(nod)
+                else:
+                    nod.evaluation = get_childs_max_novertejums(nod) if not ismaxstart else get_childs_min_novertejums(nod)
+                
+
+def testprint(nd: node):
+    print(nd.status)
+
 def main():
     n = node()
     n.letter = ord(0)
     n.status="110010"
     thetree = populate(n)
+    do_action_to_subnodes_and_this(n, try_set_novertejumu, True)
     for nd, kv in thetree.struct.items():
         for k, v in kv.items():
             a =""
             for cn in v.children:
                 a+= " ("+str(cn.level)+":"+str(cn.location)+") "
-            print(v.letter+"|"+str(v.level)+":"+str(v.location)+"|"+" -> "+v.status+" "+a)
+            print(v.letter+"|"+str(v.level)+":"+str(v.location)+"|"+" -> "+v.status+" "+("["+str(v.evaluation)+"]" if hasattr(v, 'evaluation') else "")+a)
     
 if __name__ == "__main__":
     main()
