@@ -151,7 +151,8 @@ def populate_next_level(t: tree, st: node, ncounter: int, lvlndcnt: int, lookupH
 
 def do_action_to_subnodes_and_this(nod : node, cl: callable, *args):
     for nd in nod.children:
-        do_action_to_subnodes_and_this(nd, cl, *args)
+        if not nd.perf_flag:
+            do_action_to_subnodes_and_this(nd, cl, *args)
     cl(nod, *args)
 
 def all_childs_has_novertejums(nod: node) -> bool:
