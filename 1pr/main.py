@@ -133,9 +133,7 @@ class Window(QMainWindow):
 
 def main():
     global tree
-    n = t.node()
-    n.letter = t.ord(0)
-    n.status="110010"
+    n = t.tree.root_node_factory("110010")
     thetree = t.populate(n)
     tree = thetree
     t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, True)

@@ -53,6 +53,12 @@ class tree:
     struct: dict[int, dict[int, node]]
     def __init__(self):
         self.struct = {}
+        
+    def root_node_factory(self, status: str) -> node:
+        n = node()
+        n.letter = ord(0)
+        n.status=status
+        return n
 
 def isvalidmove(state: str, frm: int, to: int)  -> bool:
     if len(state) < to: return False
