@@ -13,7 +13,7 @@ class Window(QMainWindow):
     def __init__(self, *args):
         super().__init__()
         self.tree = tree
-        self.title = "Kursa darbs 1. variants 3.risinājuma POC"
+        self.title = "1. praktiskais darbs Mākslīgā Intelekta Pamatos (3KP)"
         self.top = 100
         self.left = 100
         self.width = 680
@@ -43,7 +43,7 @@ class Window(QMainWindow):
         self.inpxstart = QSpinBox(self)
         self.inpxstart.setMinimum(0)
         self.inpxstart.setMaximum(len(self.tree.struct[0][0].status)-2)
-        self.inpxstart.setValue(150)
+        self.inpxstart.setValue(len(self.tree.struct[0][0].status)-2)
         self.inpxstart.setGeometry(self.lblxstart.geometry().x()+self.lblxstart.geometry().width(), 30+10, 50, 30)
         self.inpxstart.valueChanged[int].connect(self.valChanged)
 
@@ -68,7 +68,7 @@ class Window(QMainWindow):
         self.leStatus.setGeometry(self.lblyend.geometry().x()+self.lblyend.geometry().width(), self.ddlwhofirst.geometry().y()+30+10, 50, 100)
         self.leStatus.textChanged.connect(self.statusChanged)
 
-        self.lblstep = QLabel("solis:", self)
+        self.lblstep = QLabel("apstiprināt:", self)
         self.lblstep.setGeometry(30, self.leStatus.geometry().y()+30+10, 50, 30)
         self.btnStartGame = QPushButton(self)
         self.btnStartGame.setText("jauna spēle!")
@@ -100,15 +100,19 @@ class Window(QMainWindow):
         self.grid.addWidget(self.plotBar, 1, 1, 1, 1, Qt.AlignLeft)
         self.centralwi.setLayout(self.grid)
         self.setCentralWidget(self.centralwi)
+        self.updateGameField()
         #self.textBrowser.setGeometry( self.textBrowser.geometry().x(), self.textBrowser.geometry().y(), 2220, 5220)
         self.show()
-
-    @pyqtSlot(int)
-    def valChanged(self, value):
+    
+    def updateGameField(self):
         tex = self.tree.struct[0][0].status[0:self.inpxstart.value()]+'<span style="color: red; font-style: italic;">' + \
         self.tree.struct[0][0].status[self.inpxstart.value():self.inpxstart.value()+2]+"</span>"+ \
             self.tree.struct[0][0].status[self.inpxstart.value()+2:len(self.tree.struct[0][0].status)]
         self.textBrowser.setHtml('<h1 style="font-size: 36">'+tex+'</h1> <br /> # Varbūt gājinu vēsture?? <span style="color:red;">aaa!</span>[asdfasd] <a href="http://www.google.com">hmm</a>')
+
+    @pyqtSlot(int)
+    def valChanged(self, value):
+        self.updateGameField()
         #self.textBrowser.setMarkdown('# Hello <span style="color:red;">aaa!</span>[asdfasd](http://www.google.com)')
     
     @pyqtSlot()
@@ -118,6 +122,14 @@ class Window(QMainWindow):
     @pyqtSlot()
     def clickedNewGame(self):
         print("~~~jauna spēle~~")
+        n = t.tree.root_node_factory(self.leStatus.toPlainText ())
+        thetree = t.populate(n)
+        self.tree = thetree
+        self.inpxstart.setMaximum(len(self.tree.struct[0][0].status)-2)
+        self.tree.a_log_of_tree()
+        t.do_action_to_subnodes_and_this(n, t.try_set_novertejumu, True)
+        self.tree.a_log_of_tree()
+        self.updateGameField()
     
     @pyqtSlot(str)
     def ddlvalChanged(self, string):
